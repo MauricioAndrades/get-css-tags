@@ -96,7 +96,11 @@
   };
 
   function simpleSelector(node) {
-    var lowerCaseName = node.localName || node.nodeName.toLowerCase();
+    try {
+      var lowerCaseName = node.localName || node.nodeName.toLowerCase();
+    } catch (e) {
+      console.log(e);
+    }
     if (node.nodeType !== Node.ELEMENT_NODE)
       return lowerCaseName;
     if (lowerCaseName === 'input' && node.getAttribute('type') && !node.getAttribute('id') && !node.getAttribute('class'))
@@ -233,13 +237,23 @@
   };
   return getCSS;
 }));
-// example usage:
+
+// EXAMPLE USAGE
 var tags = [];
-var opts = {
-  simple: true
-};
-var buildOptions = function(arr, callback) {
+
+// getCSS invoked as callback.
+
+/**
+ *  getCSS invoked as callback
+ *  @param   {arr}       arr          [the array we're gonna push the tags into]
+ *  @param   {Function}  callback     [getCSS passed in as a cb ]
+ *  @return  {array}                  [returns an array of css-selectors]
+ */
+var invokedAsCallback = function(arr, callback) {
   var selector = document.querySelector('body');
+  var opts = {
+    simple: true
+  };
   callback(selector, arr, opts);
 };
-buildOptions(tags, getCSS.getTags, opts);
+invokedAsCallback(tags, getCSS.getTags);
