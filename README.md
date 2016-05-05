@@ -1,5 +1,5 @@
 # Node Parser: getTags
-The getTags module (part of the upcoming Node Parser Package) recursively parses the DOM and calculates the full css selection tags for every HTML DOM
+The getTags module (part of the upcoming Node Parser Package) recursively parses the DOM and calculates the full CSS selection tags for every HTML DOM
 element.
 
 The output looks like this:
@@ -16,20 +16,23 @@ tags = [
 ]
 ```
 
+The getCSS module exposes 2 methods:
+`getCSS.getTags(array, )`
+
 # Example Usage:
 
 ```js
 var tags = [];
-var buildOptions = function(arr, callback) {
+var opts = {
+  simple: true
+};
+var letsGetEm = function(arr, callback) {
   var selector = document.querySelector('body');
-  var opts = {
-    simple: false
-  }
+  callback(selector, arr, opts);
 };
 
-buildOptions(tags, function() {
-  getCSS.getTags(tags)
-});
+letsGetEm(tags, getCSS.getTags, opts);
+
 ```
 
 
