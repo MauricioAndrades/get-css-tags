@@ -14,6 +14,18 @@ tags = [
 	"html > head > meta:nth-child(6)"
 	"html > head > meta:nth-child(7)"
 ]
+
+//youtube
+tags = [
+	"div#early-body"
+	"div#a11y-announcements-message"
+	"div#a11y-announcements-container"
+	"div#body-container > form > input[type="hidden"]:nth-child(1)"
+	"div#body-container > form > input[type="hidden"]:nth-child(2)"
+	"div#body-container > form"
+	"button#a11y-skip-nav"
+	"button#appbar-guide-button > span > span"
+]
 ```
 
 Compared to JQuery output:
