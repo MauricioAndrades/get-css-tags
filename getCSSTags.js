@@ -12,7 +12,7 @@
   } else {
     window.domJSON = factory(root);
   }
-})(this, (function(window, arr) {
+})(this, (function(selector, arr, options) {
 
   getCSS = {};
 
@@ -49,11 +49,11 @@
     return text;
   };
 
-  getCSS.DOMComb = function(parent, arr) {
+  getCSS.getTags = function(parent, arr) {
 
     if (parent.hasChildNodes()) {
       for (var cNode = parent.firstChild; cNode; cNode = cNode.nextSibling) {
-        getCSS.DOMComb(cNode, arr);
+        getCSS.getTags(cNode, arr);
       }
 
     }
@@ -89,17 +89,20 @@
       }
     }
     if (found === true) {
-      var nodeCssPath = cssPath(this);
-      return nodeCssPath;
+      if (options) {
+        var nodeCssPath = simpleSelector(this);
+        return nodeCssPath;
+      } else {
+        var nodeCssPath = cssPath(this);
+        return nodeCssPath;
+      }
+
     }
     return found;
   };
-  /**
-   * @param {!DOMNode} node
-   * @return {string}
-   */
+
   var simpleSelector = function(node) {
-    var lowerCaseName = node.localName() || node.nodeName().toLowerCase();
+    var lowerCaseName = node.localName || node.nodeName.toLowerCase();
     if (node.nodeType !== Node.ELEMENT_NODE)
       return lowerCaseName;
     if (lowerCaseName === 'input' && node.getAttribute('type') && !node.getAttribute('id') && !node.getAttribute('class'))
@@ -129,7 +132,7 @@
 
   var isCSSIdentifier = function(value) {
     return /^-?[a-zA-Z_][a-zA-Z0-9_-]*$/.test(value);
-  }
+  };
 
   var cssPath = function(node, optimized) {
     if (node.nodeType !== Node.ELEMENT_NODE) return node;
@@ -143,20 +146,20 @@
       contextNode = contextNode.parentNode;
     }
     steps.reverse();
-    return steps.join(" > ");
-  }
+    return steps.join(' > ');
+  };
 
   var idSelector = function(id) {
-    return "#" + escapeIdentifierIfNeeded(id);
-  }
+    return '#' + escapeIdentifierIfNeeded(id);
+  };
 
   var _cssPathStep = function(node, optimized, isTargetNode) {
     if (node.nodeType !== Node.ELEMENT_NODE) return null;
-    var id = node.getAttribute("id");
+    var id = node.getAttribute('id');
     if (optimized) {
       if (id) return new DOMNodePathStep(idSelector(id), true);
       var nodeNameLower = node.nodeName.toLowerCase();
-      if (nodeNameLower === "body" || nodeNameLower === "head" || nodeNameLower === "html") return new DOMNodePathStep(node.nodeName.toLowerCase(), true);
+      if (nodeNameLower === 'body' || nodeNameLower === 'head' || nodeNameLower === 'html') return new DOMNodePathStep(node.nodeName.toLowerCase(), true);
     }
     var nodeName = node.nodeName.toLowerCase();
     if (id) return new DOMNodePathStep(nodeName.toLowerCase() + idSelector(id), true);
@@ -164,10 +167,10 @@
     if (!parent || parent.nodeType === Node.DOCUMENT_NODE) return new DOMNodePathStep(nodeName.toLowerCase(), true);
 
     var prefixedElementClassNames = function(node) {
-      var classAttribute = node.getAttribute("class");
+      var classAttribute = node.getAttribute('class');
       if (!classAttribute) return [];
       return classAttribute.split(/\s+/g).filter(Boolean).map(function(name) {
-        return "$" + name;
+        return '$' + name;
       });
     };
 
@@ -181,12 +184,12 @@
     };
 
     var escapeAsciiChar = function(c, isLast) {
-      return "\\" + toHexByte(c) + (isLast ? "" : " ");
+      return '\\' + toHexByte(c) + (isLast ? '' : ' ');
     };
 
     var toHexByte = function(c) {
       var hexByte = c.charCodeAt(0).toString(16);
-      if (hexByte.length === 1) hexByte = "0" + hexByte;
+      if (hexByte.length === 1) hexByte = '0' + hexByte;
       return hexByte;
     };
 
@@ -234,11 +237,11 @@
     }
 
     var result = nodeName.toLowerCase();
-    if (isTargetNode && nodeName.toLowerCase() === "input" && node.getAttribute("type") && !node.getAttribute("id") && !node.getAttribute("class")) result += '[type="' + node.getAttribute("type") + '"]';
+    if (isTargetNode && nodeName.toLowerCase() === 'input' && node.getAttribute('type') && !node.getAttribute('id') && !node.getAttribute('class')) result += '[type="' + node.getAttribute('type') + '"]';
     if (needsNthChild) {
-      result += ":nth-child(" + (ownIndex + 1) + ")";
+      result += ':nth-child(' + (ownIndex + 1) + ')';
     } else if (needsClassNames) {
-      for (var prefixedName in prefixedOwnClassNamesArray) result += "." + escapeIdentifierIfNeeded(prefixedOwnClassNamesArray[prefixedName].substr(1));
+      for (var prefixedName in prefixedOwnClassNamesArray) result += '.' + escapeIdentifierIfNeeded(prefixedOwnClassNamesArray[prefixedName].substr(1));
     }
     return new DOMNodePathStep(result, false);
   };
@@ -256,3 +259,16 @@
 
   return getCSS;
 }));
+
+// example usage:
+var tags = [];
+var opts = {
+  simple: true
+};
+var buildOptions = function(arr, callback) {
+  var selector = document.querySelector('body');
+
+  callback(selector, arr, opts);
+};
+
+buildOptions(tags, getCSS.getTags, opts);
