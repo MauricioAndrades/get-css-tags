@@ -13,21 +13,7 @@
     window.domJSON = factory(root);
   }
 })(this, (function(selector, arr, options) {
-
   getCSS = {};
-
-  var getContentDocument = function(contentDocument) {
-    if (contentDocument.body) {
-      return contentDocument.body;
-    } else {
-      var bodyElement = contentDocument.querySelector('body');
-      if (bodyElement) {
-        return bodyElement;
-      }
-    }
-    return contentDocument.documentElement;
-  };
-
   getCSS.getText = function(element) {
     var text = '';
     if (element) {
@@ -48,20 +34,29 @@
     }
     return text;
   };
-
   getCSS.getTags = function(parent, arr) {
-
     if (parent.hasChildNodes()) {
       for (var cNode = parent.firstChild; cNode; cNode = cNode.nextSibling) {
         getCSS.getTags(cNode, arr);
       }
-
     }
     var nodePath = nodeFilter.call(parent);
     if (nodePath) arr.push(nodePath);
   };
 
-  var nodeFilter = function(node) {
+  function getContentDocument(contentDocument) {
+    if (contentDocument.body) {
+      return contentDocument.body;
+    } else {
+      var bodyElement = contentDocument.querySelector('body');
+      if (bodyElement) {
+        return bodyElement;
+      }
+    }
+    return contentDocument.documentElement;
+  };
+
+  function nodeFilter(node) {
     node = this;
     currentNodeType = node.nodeType;
     var found = false;
@@ -96,12 +91,11 @@
         var nodeCssPath = cssPath(this);
         return nodeCssPath;
       }
-
     }
     return found;
   };
 
-  var simpleSelector = function(node) {
+  function simpleSelector(node) {
     var lowerCaseName = node.localName || node.nodeName.toLowerCase();
     if (node.nodeType !== Node.ELEMENT_NODE)
       return lowerCaseName;
@@ -114,27 +108,7 @@
     return lowerCaseName;
   };
 
-  var isCSSIdentChar = function(c) {
-    if (/[a-zA-Z0-9_-]/.test(c))
-      return true;
-    return c.charCodeAt(0) >= 0xA0;
-  };
-
-  var escapeIdentifierIfNeeded = function(ident) {
-    if (isCSSIdentifier(ident))
-      return ident;
-    var shouldEscapeFirst = /^(?:[0-9]|-[0-9-]?)/.test(ident);
-    var lastIndex = ident.length - 1;
-    return ident.replace(/./g, function(c, i) {
-      return ((shouldEscapeFirst && i === 0) || !isCSSIdentChar(c)) ? escapeAsciiChar(c, i === lastIndex) : c;
-    });
-  };
-
-  var isCSSIdentifier = function(value) {
-    return /^-?[a-zA-Z_][a-zA-Z0-9_-]*$/.test(value);
-  };
-
-  var cssPath = function(node, optimized) {
+  function cssPath(node, optimized) {
     if (node.nodeType !== Node.ELEMENT_NODE) return node;
     var steps = [];
     var contextNode = node;
@@ -149,11 +123,7 @@
     return steps.join(' > ');
   };
 
-  var idSelector = function(id) {
-    return '#' + escapeIdentifierIfNeeded(id);
-  };
-
-  var _cssPathStep = function(node, optimized, isTargetNode) {
+  function _cssPathStep(node, optimized, isTargetNode) {
     if (node.nodeType !== Node.ELEMENT_NODE) return null;
     var id = node.getAttribute('id');
     if (optimized) {
@@ -166,7 +136,7 @@
     var parent = node.parentNode;
     if (!parent || parent.nodeType === Node.DOCUMENT_NODE) return new DOMNodePathStep(nodeName.toLowerCase(), true);
 
-    var prefixedElementClassNames = function(node) {
+    function prefixedElementClassNames(node) {
       var classAttribute = node.getAttribute('class');
       if (!classAttribute) return [];
       return classAttribute.split(/\s+/g).filter(Boolean).map(function(name) {
@@ -174,34 +144,41 @@
       });
     };
 
-    var escapeIdentifierIfNeeded = function(ident) {
+    function idSelector(id) {
+      return '#' + escapeIdentifierIfNeeded(id);
+    }
+
+    function escapeIdentifierIfNeeded(ident) {
       if (isCSSIdentifier(ident)) return ident;
       var shouldEscapeFirst = /^(?:[0-9]|-[0-9-]?)/.test(ident);
       var lastIndex = ident.length - 1;
-      return ident.replace(/./g, function(c, i) {
-        return shouldEscapeFirst && i === 0 || !isCSSIdentChar(c) ? escapeAsciiChar(c, i === lastIndex) : c;
-      });
+      try {
+        return ident.replace(/./g, function(c, i) {
+          return shouldEscapeFirst && i === 0 || !isCSSIdentChar(c) ? escapeAsciiChar(c, i === lastIndex) : c;
+        });
+      } catch (e) {
+        console.log(e);
+      }
     };
 
-    var escapeAsciiChar = function(c, isLast) {
+    function escapeAsciiChar(c, isLast) {
       return '\\' + toHexByte(c) + (isLast ? '' : ' ');
     };
 
-    var toHexByte = function(c) {
+    function toHexByte(c) {
       var hexByte = c.charCodeAt(0).toString(16);
       if (hexByte.length === 1) hexByte = '0' + hexByte;
       return hexByte;
     };
 
-    var isCSSIdentChar = function(c) {
+    function isCSSIdentChar(c) {
       if (/[a-zA-Z0-9_-]/.test(c)) return true;
       return c.charCodeAt(0) >= 160;
     };
 
-    var isCSSIdentifier = function(value) {
+    function isCSSIdentifier(value) {
       return /^-?[a-zA-Z_][a-zA-Z0-9_-]*$/.test(value);
     };
-
     var prefixedOwnClassNamesArray = prefixedElementClassNames(node);
     var needsClassNames = false;
     var needsNthChild = false;
@@ -235,7 +212,6 @@
         }
       }
     }
-
     var result = nodeName.toLowerCase();
     if (isTargetNode && nodeName.toLowerCase() === 'input' && node.getAttribute('type') && !node.getAttribute('id') && !node.getAttribute('class')) result += '[type="' + node.getAttribute('type') + '"]';
     if (needsNthChild) {
@@ -246,20 +222,17 @@
     return new DOMNodePathStep(result, false);
   };
 
-  var DOMNodePathStep = function(value, optimized) {
+  function DOMNodePathStep(value, optimized) {
     this.value = value;
     this.optimized = optimized || false;
   };
-
   DOMNodePathStep.prototype = {
     toString: function() {
       return this.value;
     }
   };
-
   return getCSS;
 }));
-
 // example usage:
 var tags = [];
 var opts = {
@@ -267,8 +240,6 @@ var opts = {
 };
 var buildOptions = function(arr, callback) {
   var selector = document.querySelector('body');
-
   callback(selector, arr, opts);
 };
-
 buildOptions(tags, getCSS.getTags, opts);
