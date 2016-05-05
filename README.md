@@ -18,34 +18,34 @@ tags = [
 
 Compared to JQuery output:
 ```js
-	$obj = [
-		html.redesign
-		head
-		meta
-		meta
-		script
-		script
-		title
-		meta
-		meta
-	]
+$obj = [
+	html.redesign
+	head
+	meta
+	meta
+	script
+	script
+	title
+	meta
+	meta
+]
 ```
 
 
-`getCSS.getTags(array, )`
+`getCSS.getTags(selector, array, options)`
 
 # Example Usage:
 
 ```js
+// EXAMPLE USAGE
+
 var tags = [];
-var invokedAsCallback = function(arr, callback) {
-  var selector = document.querySelector('body');
-  var opts = {
-    simple: true
-  };
-  callback(selector, arr, opts);
+var selector = document.querySelector('body');
+var opts = {
+	simple: false
 };
-invokedAsCallback(tags, getCSS.getTags, opts);
+
+getCSS.getTags(selector, tags, opts)
 
 ```
 
