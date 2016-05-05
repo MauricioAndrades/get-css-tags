@@ -17,6 +17,7 @@ tags = [
 ```
 
 Compared to JQuery output:
+
 ```js
 $obj = [
 	html.redesign
@@ -31,14 +32,15 @@ $obj = [
 ]
 ```
 
-
-`getCSS.getTags(selector, array, options)`
-
 # Example Usage:
-
+`getCSS.getTags(selector, array, options)`
+`selector` starting node.
+`array` The array we're gonna push the tags into.
+`options.simple[bool]:` return simple selectors if true|full selectors if false.
+`
 ```js
 // EXAMPLE USAGE
-
+// `getCSS.getTags(selector, array, options)`
 var tags = [];
 var selector = document.querySelector('body');
 var opts = {
