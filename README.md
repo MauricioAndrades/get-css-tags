@@ -1,38 +1,28 @@
 # Node Parser: getTags
-The getTags module (part of the upcoming Node Parser Package) recursively parses the DOM and calculates the full CSS selection tags for every HTML DOM
-element.
+The getTags module (part of the upcoming Node Parser Package) recursively
+parses the DOM and calculates the full CSS selection tags for every element
+Node.
 
 Example Output:
 
 ```js
 tags = [
-	"html > head > meta:nth-child(1)"
-	"html > head > meta:nth-child(2)"
-	"html > head > script:nth-child(3)"
-	"html > head > script:nth-child(4)"
-	"html > head > title"
-	"html > head > meta:nth-child(6)"
-	"html > head > meta:nth-child(7)"
+	"html > head > meta:nth-child(1)",
+	"html > head > meta:nth-child(2)",
+	"html > head > script:nth-child(3)",
+	"html > head > script:nth-child(4)",
+	"html > head > title",
+	"html > head > meta:nth-child(6)",
+	"html > head > meta:nth-child(7)",
+	"div#thing_t3_4jnhrn > div.midcol.unvoted > div.score.dislikes",
+	"div#thing_t3_4jnhrn > div.midcol.unvoted > div.score.unvoted"
 ]
-
-//youtube
-tags = [
-	"div#early-body"
-	"div#a11y-announcements-message"
-	"div#a11y-announcements-container"
-	"div#body-container > form > input[type="hidden"]:nth-child(1)"
-	"div#body-container > form > input[type="hidden"]:nth-child(2)"
-	"div#body-container > form"
-	"button#a11y-skip-nav"
-	"button#appbar-guide-button > span > span"
-]
-```
 
 Compared to JQuery output:
 
 ```js
-$obj = [
-	html.redesign
+$JQ = [
+	html
 	head
 	meta
 	meta
@@ -46,13 +36,17 @@ $obj = [
 
 # Example Usage:
 `getCSS.getTags(selector, array, options)`
+
 `selector` starting node.
+
 `array` The array we're gonna push the tags into.
-`options.simple[bool]:` return simple selectors if true|full selectors if false.
+
+`options.simple[bool]:` Options object. `true|false`
 `
 ```js
 // EXAMPLE USAGE
 // `getCSS.getTags(selector, array, options)`
+
 var tags = [];
 var selector = document.querySelector('body');
 var opts = {
