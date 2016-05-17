@@ -1,9 +1,12 @@
 # Node Parser: getTags
+
 The getTags module (part of the upcoming Node Parser Package) recursively
 parses the DOM and calculates the full CSS selection tags for every element
 Node.
 
-Example Output:
+The script can be executed in the devtools, or required as a node package.
+
+###Example Output:
 
 ```js
 tags = [
@@ -18,7 +21,7 @@ tags = [
 	"div#thing_t3_4jnhrn > div.midcol.unvoted > div.score.unvoted"
 ]
 
-Compared to JQuery output:
+###Compared to JQuery output:
 
 ```js
 $JQ = [
@@ -34,7 +37,8 @@ $JQ = [
 ]
 ```
 
-# Example Usage:
+## Example Usage:
+
 `getCSS.getTags(selector, array, options)`
 
 `selector` starting node.
