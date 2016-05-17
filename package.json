@@ -1,0 +1,28 @@
+{
+  "name": "get-css-tags",
+  "version": "1.0.0",
+  "description": "Create an array with simple or full cssSelector paths.",
+  "main": "getCSSTags.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MauricioAndrades/get-css-tags.git"
+  },
+  "keywords": [
+    "css",
+    "data-scraping",
+    "nightmare"
+  ],
+  "author": "Mauricio Andrades <mauricioandades@yahoo.com>",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/MauricioAndrades/get-css-tags/issues"
+  },
+  "homepage": "https://github.com/MauricioAndrades/get-css-tags#readme",
+  "devDependencies": {
+    "chai": "^3.5.0",
+    "mocha": "^2.4.5"
+  }
+}

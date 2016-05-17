@@ -57,37 +57,39 @@
       }
     }
     if (found === true) {
+      var nodeCssPath;
       if (opts.simple === true) {
-        var nodeCssPath = simpleSelector(node);
+        nodeCssPath = simpleSelector(node);
         return nodeCssPath;
       } else {
-        var nodeCssPath = cssPath(node);
+        nodeCssPath = cssPath(node);
         return nodeCssPath;
       }
     }
     return found;
-  };
+  }
 
   function simpleSelector(node) {
+    var lowerCaseName = "";
     try {
-      var lowCaseName = node.localName || node.nodeName.toLowerCase();
+      lowerCaseName = node.localName || node.nodeName.toLowerCase();
     } catch (e) {
-      console.log(e);
+      arr.push(e);
     }
     if (node.nodeType !== Node.ELEMENT_NODE) {
-      return lowCaseName;
+      return lowerCaseName;
     }
-    if (lowCaseName === 'input' && node.getAttribute('type') && !node.getAttribute('id') && !node.getAttribute('class')) {
-      return lowCaseName + '[type=\"' + node.getAttribute('type') + '\"]';
+    if (lowerCaseName === 'input' && node.getAttribute('type') && !node.getAttribute('id') && !node.getAttribute('class')) {
+      return lowerCaseName + '[type=\"' + node.getAttribute('type') + '\"]';
     }
     if (node.getAttribute('id')) {
-      return lowCaseName + '#' + node.getAttribute('id');
+      return lowerCaseName + '#' + node.getAttribute('id');
     }
     if (node.getAttribute('class')) {
-      return (lowCaseName === 'div' ? '' : lowCaseName) + '.' + node.getAttribute('class').trim().replace(/\s+/g, '.');
+      return (lowerCaseName === 'div' ? '' : lowerCaseName) + '.' + node.getAttribute('class').trim().replace(/\s+/g, '.');
     }
-    return lowCaseName;
-  };
+    return lowerCaseName;
+  }
 
   function cssPath(node, optimized) {
     if (node.nodeType !== Node.ELEMENT_NODE)
@@ -106,32 +108,38 @@
     }
     steps.reverse();
     return steps.join(' > ');
-  };
+  }
 
   function cssPathStep(node, optimized, isTargetNode) {
     if (node.nodeType !== Node.ELEMENT_NODE) {
       return null;
     }
+
     var nodeID = node.getAttribute('id');
+
     if (optimized) {
       if (nodeID) {
-        return new dNodePathStep(idSelector(nodeID), true);
+        return new domNodePathStep(idSelector(nodeID), true);
       }
       var nodeNameLower = node.nodeName.toLowerCase();
       if (nodeNameLower === 'body' || nodeNameLower === 'head' || nodeNameLower === 'html') {
-        return new dNodePathStep(node.nodeName.toLowerCase(), true);
+        return new domNodePathStep(node.nodeName.toLowerCase(), true);
       }
     }
+
     var nodeName = node.nodeName.toLowerCase();
+
     if (nodeID) {
-      return new dNodePathStep(nodeName.toLowerCase() + idSelector(nodeID), true);
-    }
-    var parentNode = node.parentNode;
-    if (!parentNode || parentNode.nodeType === Node.DOCUMENT_NODE) {
-      return new dNodePathStep(nodeName.toLowerCase(), true);
+      return new domNodePathStep(nodeName.toLowerCase() + idSelector(nodeID), true);
     }
 
-    function prefixElClassName(node) {
+    var parentNode = node.parentNode;
+
+    if (!parentNode || parentNode.nodeType === Node.DOCUMENT_NODE) {
+      return new domNodePathStep(nodeName.toLowerCase(), true);
+    }
+
+    function prefixedElClassName(node) {
       var classAttr = node.getAttribute('class');
       if (!classAttr) {
         return [];
@@ -139,30 +147,32 @@
       return classAttr.split(/\s+/g).filter(Boolean).map(function(name) {
         return '$' + name;
       });
-    };
+    }
 
     function idSelector(id) {
       return '#' + escIdentifier(id);
     }
 
     function escIdentifier(ident) {
-      if (isCSSIdentifier(ident)) {
+      if (isIdentifier(ident)) {
         return ident;
       }
-      var shouldEscape = /^(?:[0-9]|-[0-9-]?)/.test(ident);
+      var escapeTest = /^(?:[0-9]|-[0-9-]?)/.test(ident);
       var lastIndex = ident.length - 1;
       try {
         return ident.replace(/./g, function(c, i) {
-          return shouldEscape && i === 0 || !isCSSIdentChar(c) ? escapeASCII(c, i === lastIndex) : c;
+          return escapeTest && i === 0 || !isIdentChar(c) ? escAscii(c, i === lastIndex) : c;
         });
       } catch (e) {
-        console.log(e);
+        arr.push(e);
       }
-    };
+    }
 
-    function escapeASCII(c, isLast) {
+
+    function escAscii(c, isLast) {
       return '\\' + toHexByte(c) + (isLast ? '' : ' ');
-    };
+    }
+
 
     function toHexByte(c) {
       var hexByte = c.charCodeAt(0).toString(16);
@@ -170,79 +180,96 @@
         hexByte = '0' + hexByte;
       }
       return hexByte;
-    };
+    }
 
-    function isCSSIdentChar(c) {
+    /**
+     *  @param   {string}   c  character
+     *  @return  {Boolean}
+     */
+    function isIdentChar(c) {
       if (/[a-zA-Z0-9_-]/.test(c)) {
         return true;
       }
       return c.charCodeAt(0) >= 160;
-    };
+    }
 
-    function isCSSIdentifier(value) {
+
+    function isIdentifier(value) {
       return /^-?[a-zA-Z_][a-zA-Z0-9_-]*$/.test(value);
-    };
-    var prefixOClassNameArr = prefixElClassName(node);
+    }
+
+    var prefixedOClassNameArr = prefixedElClassName(node);
     var needsClass = false;
     var needsNthChild = false;
     var ownIndex = -1;
-    var siblings = parentNode.children;
+    var sibs = parentNode.children;
+
     for (var i = 0;
-      (ownIndex === -1 || !needsNthChild) && i < siblings.length; ++i) {
-      var sibling = siblings[i];
-      if (sibling === node) {
+      (ownIndex === -1 || !needsNthChild) && i < sibs.length; ++i) {
+      var sib = sibs[i];
+
+      if (sib === node) {
         ownIndex = i;
         continue;
       }
+
       if (needsNthChild) {
         continue;
       }
-      if (sibling.nodeName.toLowerCase() !== nodeName.toLowerCase()) {
+
+      if (sib.nodeName.toLowerCase() !== nodeName.toLowerCase()) {
         continue;
       }
+
       needsClass = true;
-      var oClassName = prefixOClassNameArr;
+      var oClassName = prefixedOClassNameArr;
       var oClassNameCount = 0;
+
       for (var name in oClassName) {
         ++oClassNameCount;
       }
+
       if (oClassNameCount === 0) {
         needsNthChild = true;
         continue;
       }
-      var sibClassNamesArr = prefixElClassName(sibling);
+
+      var sibClassNamesArr = prefixedElClassName(sib);
       for (var j = 0; j < sibClassNamesArr.length; ++j) {
-        var siblingClass = sibClassNamesArr[j];
-        if (oClassName.indexOf(siblingClass)) {
+        var sibClass = sibClassNamesArr[j];
+        if (oClassName.indexOf(sibClass)) {
           continue;
         }
-        delete oClassName[siblingClass];
+        delete oClassName[sibClass];
         if (!--oClassNameCount) {
           needsNthChild = true;
           break;
         }
       }
     }
+
     var result = nodeName.toLowerCase();
+
     if (isTargetNode && nodeName.toLowerCase() === 'input' && node.getAttribute('type') && !node.getAttribute('id') && !node.getAttribute('class')) {
       result += '[type="' + node.getAttribute('type') + '"]';
     }
+
     if (needsNthChild) {
       result += ':nth-child(' + (ownIndex + 1) + ')';
     } else if (needsClass) {
-      for (var prefixedName in prefixOClassNameArr) {
-        result += '.' + escIdentifier(prefixOClassNameArr[prefixedName].substr(1));
+      for (var prefixedName in prefixedOClassNameArr) {
+        result += '.' + escIdentifier(prefixedOClassNameArr[prefixedName].substr(1));
       }
     }
-    return new dNodePathStep(result, false);
-  };
+    return new domNodePathStep(result, false);
+  }
 
-  function dNodePathStep(value, optimized) {
+  function domNodePathStep(value, optimized) {
     this.value = value;
     this.optimized = optimized || false;
-  };
+  }
 
-  dNodePathStep.prototype = {
+  domNodePathStep.prototype = {
     toString: function() {
       return this.value;
     }
